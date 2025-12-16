@@ -5,7 +5,6 @@ import { Upload } from 'lucide-react';
 const CATEGORIES = [
     "Documents archivés",
     "Documents supportés", 
-    "Base de données perso"
 ];
 
 // Le composant attend la fonction de rappel pour rafraîchir le dashboard après succès

@@ -10,9 +10,12 @@ interface UserData {
   // Informations civiles
   civilite: string;
   nom: string;
+  nomUsage: string;
+  nomNaissance: string;
   prenom: string;
   dateNaissance: string;
   lieuNaissance: string;
+  codePostalNaissance: string;
   nationalite: string;
   situation: string;
   nombreEnfants: string;
@@ -44,6 +47,16 @@ interface UserData {
   numeroPermis: string;
   dateValiditePermis: string;
   
+  // Véhicules (tableau pour plusieurs véhicules)
+  vehicules: Array<{
+    marque: string;
+    modele: string;
+    immatriculation: string;
+    chevaux: string;
+    annee: string;
+    carburant: string;
+  }>;
+  
   // Professionnels
   profession: string;
   entreprise: string;
@@ -63,10 +76,14 @@ interface UserData {
   bic: string;
   nomBanque: string;
   
-  // Fiscalité
+  // Fiscalité (pour les entreprises)
   numeroFiscal: string;
   numeroTVA: string;
   revenuAnnuel: string;
+  
+  // Revenus fiscaux du foyer
+  revenuFiscalFoyer: string;
+  quotientFamilial: string;
   
   // Santé
   numeroMutuelle: string;
@@ -81,10 +98,11 @@ interface UserData {
   assuranceHabitation: string;
   numeroAssuranceResponsabilite: string;
   
-  // Véhicule
-  marqueVehicule: string;
-  modeleVehicule: string;
-  immatriculationVehicule: string;
+  // RQTH
+  rqthStatut: string; // "oui" ou "non"
+  rqthNumero: string;
+  rqthDateRenouvellement: string;
+  rqthOrganisme: string;
   
   // Éducation
   diplomeNiveau: string;
@@ -96,8 +114,6 @@ interface UserData {
   nomUrgence: string;
   telephoneUrgence: string;
   relationUrgence: string;
-  
-
 }
 
 const Profile = () => {
@@ -109,9 +125,12 @@ const Profile = () => {
     // Civiles
     civilite: "M",
     nom: "Dupont",
+    nomUsage: "Dupont",
+    nomNaissance: "Dupont",
     prenom: "Jean",
     dateNaissance: "1990-01-15",
     lieuNaissance: "Paris",
+    codePostalNaissance: "75000",
     nationalite: "Française",
     situation: "Marié(e)",
     nombreEnfants: "2",
@@ -143,6 +162,18 @@ const Profile = () => {
     numeroPermis: "123456789012",
     dateValiditePermis: "2030-01-15",
     
+    // Véhicules
+    vehicules: [
+      {
+        marque: "Peugeot",
+        modele: "308",
+        immatriculation: "AB-123-CD",
+        chevaux: "110",
+        annee: "2020",
+        carburant: "Essence"
+      }
+    ],
+    
     // Professionnels
     profession: "Ingénieur",
     entreprise: "TechCorp",
@@ -167,6 +198,10 @@ const Profile = () => {
     numeroTVA: "FR12345678901",
     revenuAnnuel: "50000",
     
+    // Revenus fiscaux du foyer
+    revenuFiscalFoyer: "75000",
+    quotientFamilial: "2.5",
+    
     // Santé
     numeroMutuelle: "12345678",
     mutuelle: "Axa Assurances",
@@ -180,10 +215,11 @@ const Profile = () => {
     assuranceHabitation: "Allianz",
     numeroAssuranceResponsabilite: "RC123456789",
     
-    // Véhicule
-    marqueVehicule: "Peugeot",
-    modeleVehicule: "308",
-    immatriculationVehicule: "AB-123-CD",
+    // RQTH
+    rqthStatut: "non",
+    rqthNumero: "",
+    rqthDateRenouvellement: "",
+    rqthOrganisme: "",
     
     // Éducation
     diplomeNiveau: "Master",
@@ -297,6 +333,16 @@ const Profile = () => {
                       <Input value={editedData.nom} onChange={(e) => handleInputChange("nom", e.target.value)} className="text-sm" />
                     </div>
                     <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Nom d'usage</label>
+                      <Input value={editedData.nomUsage} onChange={(e) => handleInputChange("nomUsage", e.target.value)} className="text-sm" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Nom de naissance</label>
+                      <Input value={editedData.nomNaissance} onChange={(e) => handleInputChange("nomNaissance", e.target.value)} className="text-sm" />
+                    </div>
+                    <div>
                       <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Date de naissance</label>
                       <Input type="date" value={editedData.dateNaissance} onChange={(e) => handleInputChange("dateNaissance", e.target.value)} className="text-sm" />
                     </div>
@@ -307,11 +353,15 @@ const Profile = () => {
                       <Input value={editedData.lieuNaissance} onChange={(e) => handleInputChange("lieuNaissance", e.target.value)} className="text-sm" />
                     </div>
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Nationalité</label>
-                      <Input value={editedData.nationalite} onChange={(e) => handleInputChange("nationalite", e.target.value)} className="text-sm" />
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Code postal du lieu de naissance</label>
+                      <Input value={editedData.codePostalNaissance} onChange={(e) => handleInputChange("codePostalNaissance", e.target.value)} className="text-sm" placeholder="Ex: 75000" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Nationalité</label>
+                      <Input value={editedData.nationalite} onChange={(e) => handleInputChange("nationalite", e.target.value)} className="text-sm" />
+                    </div>
                     <div>
                       <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Situation familiale</label>
                       <select value={editedData.situation} onChange={(e) => handleInputChange("situation", e.target.value)} className="w-full px-3 py-2 border rounded text-sm">
@@ -322,6 +372,8 @@ const Profile = () => {
                         <option value="Veuf(ve)">Veuf(ve)</option>
                       </select>
                     </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div>
                       <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Nombre d'enfants</label>
                       <Input type="number" value={editedData.nombreEnfants} onChange={(e) => handleInputChange("nombreEnfants", e.target.value)} className="text-sm" />
@@ -343,7 +395,7 @@ const Profile = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro</label>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro <span className="text-xs text-gray-500">(identifiant unique du document)</span></label>
                       <Input value={editedData.numeroDocument} onChange={(e) => handleInputChange("numeroDocument", e.target.value)} className="text-sm" />
                     </div>
                   </div>
@@ -443,6 +495,143 @@ const Profile = () => {
                   </div>
                 </div>
 
+                {/* Section Véhicules */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-sm font-semibold text-foreground border-b pb-2 flex-1">Véhicules</h3>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const newVehicule = { marque: "", modele: "", immatriculation: "", chevaux: "", annee: "", carburant: "" };
+                        setEditedData({
+                          ...editedData,
+                          vehicules: [...editedData.vehicules, newVehicule]
+                        });
+                      }}
+                      className="text-xs"
+                    >
+                      + Ajouter un véhicule
+                    </Button>
+                  </div>
+                  {editedData.vehicules.map((vehicule, index) => (
+                    <div key={index} className="border rounded-lg p-3 mb-3 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-medium text-muted-foreground">Véhicule {index + 1}</span>
+                        {editedData.vehicules.length > 1 && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditedData({
+                                ...editedData,
+                                vehicules: editedData.vehicules.filter((_, i) => i !== index)
+                              });
+                            }}
+                            className="text-xs text-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Marque</label>
+                          <Input 
+                            value={vehicule.marque}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].marque = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="text-sm"
+                            placeholder="Ex: Peugeot"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Modèle</label>
+                          <Input 
+                            value={vehicule.modele}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].modele = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="text-sm"
+                            placeholder="Ex: 308"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Plaque d'immatriculation</label>
+                          <Input 
+                            value={vehicule.immatriculation}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].immatriculation = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="text-sm"
+                            placeholder="Ex: AB-123-CD"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Chevaux fiscaux</label>
+                          <Input 
+                            value={vehicule.chevaux}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].chevaux = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="text-sm"
+                            placeholder="Ex: 110"
+                            type="number"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Année</label>
+                          <Input 
+                            value={vehicule.annee}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].annee = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="text-sm"
+                            placeholder="Ex: 2020"
+                            type="number"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-muted-foreground mb-1 block">Carburant</label>
+                          <select
+                            value={vehicule.carburant}
+                            onChange={(e) => {
+                              const newVehicules = [...editedData.vehicules];
+                              newVehicules[index].carburant = e.target.value;
+                              setEditedData({ ...editedData, vehicules: newVehicules });
+                            }}
+                            className="w-full px-3 py-2 border rounded text-sm"
+                          >
+                            <option value="">Sélectionnez...</option>
+                            <option value="Essence">Essence</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Électrique">Électrique</option>
+                            <option value="Hybride">Hybride</option>
+                            <option value="Gaz">Gaz</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Section Professionnels */}
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Informations Professionnelles</h3>
@@ -530,7 +719,7 @@ const Profile = () => {
 
                 {/* Section Fiscalité */}
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Fiscalité</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Fiscalité <span className="text-xs text-gray-500">(pour les entreprises)</span></h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro fiscal</label>
@@ -544,6 +733,21 @@ const Profile = () => {
                   <div className="mt-3">
                     <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Revenu annuel</label>
                     <Input type="number" value={editedData.revenuAnnuel} onChange={(e) => handleInputChange("revenuAnnuel", e.target.value)} className="text-sm" />
+                  </div>
+                </div>
+
+                {/* Section Revenus Fiscaux du Foyer */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Revenus Fiscaux du Foyer</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Revenu fiscal du foyer</label>
+                      <Input type="number" value={editedData.revenuFiscalFoyer} onChange={(e) => handleInputChange("revenuFiscalFoyer", e.target.value)} className="text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Quotient familial</label>
+                      <Input type="number" step="0.1" value={editedData.quotientFamilial} onChange={(e) => handleInputChange("quotientFamilial", e.target.value)} className="text-sm" />
+                    </div>
                   </div>
                 </div>
 
@@ -610,23 +814,53 @@ const Profile = () => {
                   </div>
                 </div>
 
-                {/* Section Véhicule */}
+                {/* Section RQTH */}
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Véhicule</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Marque</label>
-                      <Input value={editedData.marqueVehicule} onChange={(e) => handleInputChange("marqueVehicule", e.target.value)} className="text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Modèle</label>
-                      <Input value={editedData.modeleVehicule} onChange={(e) => handleInputChange("modeleVehicule", e.target.value)} className="text-sm" />
+                  <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">RQTH (Reconnaissance de la Qualité de Travailleur Handicapé)</h3>
+                  <div className="mb-4">
+                    <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 block">Êtes-vous RQTH ?</label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="rqth"
+                          value="oui"
+                          checked={editedData.rqthStatut === "oui"}
+                          onChange={(e) => handleInputChange("rqthStatut", e.target.value)}
+                          className="cursor-pointer"
+                        />
+                        <span className="text-sm">Oui</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="rqth"
+                          value="non"
+                          checked={editedData.rqthStatut === "non"}
+                          onChange={(e) => handleInputChange("rqthStatut", e.target.value)}
+                          className="cursor-pointer"
+                        />
+                        <span className="text-sm">Non</span>
+                      </label>
                     </div>
                   </div>
-                  <div className="mt-3">
-                    <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Immatriculation</label>
-                    <Input value={editedData.immatriculationVehicule} onChange={(e) => handleInputChange("immatriculationVehicule", e.target.value)} className="text-sm" />
-                  </div>
+
+                  {editedData.rqthStatut === "oui" && (
+                    <div className="space-y-3 mt-4 p-3 bg-secondary/30 rounded-lg border border-secondary">
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro RQTH</label>
+                        <Input value={editedData.rqthNumero} onChange={(e) => handleInputChange("rqthNumero", e.target.value)} className="text-sm" placeholder="Ex: RQTH0123456789" />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Date de renouvellement</label>
+                        <Input type="date" value={editedData.rqthDateRenouvellement} onChange={(e) => handleInputChange("rqthDateRenouvellement", e.target.value)} className="text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Organisme de reconnaissance</label>
+                        <Input value={editedData.rqthOrganisme} onChange={(e) => handleInputChange("rqthOrganisme", e.target.value)} className="text-sm" placeholder="Ex: MDPH" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Section Éducation */}
@@ -695,14 +929,27 @@ const Profile = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nom}</p></div>
+                    {userData.nomUsage && (
+                      <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom d'usage</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nomUsage}</p></div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
+                    {userData.nomNaissance && (
+                      <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nomNaissance}</p></div>
+                    )}
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateNaissance}</p></div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Lieu de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.lieuNaissance}</p></div>
-                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nationalité</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nationalite}</p></div>
+                    {userData.codePostalNaissance && (
+                      <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Code postal du lieu de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.codePostalNaissance}</p></div>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
+                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nationalité</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nationalite}</p></div>
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Situation familiale</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.situation}</p></div>
+                  </div>
+                  <div className="mt-3">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nombre d'enfants</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nombreEnfants}</p></div>
                   </div>
                 </div>
@@ -852,7 +1099,7 @@ const Profile = () => {
                 {/* Section Fiscalité */}
                 {(userData.numeroFiscal || userData.numeroTVA || userData.revenuAnnuel) && (
                   <div>
-                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Fiscalité</h3>
+                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Fiscalité <span className="text-xs text-gray-500">(pour les entreprises)</span></h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                       {userData.numeroFiscal && (
                         <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Numéro fiscal</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.numeroFiscal}</p></div>
@@ -864,6 +1111,21 @@ const Profile = () => {
                     {userData.revenuAnnuel && (
                       <div className="mt-3 p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Revenu annuel</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.revenuAnnuel}€</p></div>
                     )}
+                  </div>
+                )}
+
+                {/* Section Revenus Fiscaux du Foyer */}
+                {(userData.revenuFiscalFoyer || userData.quotientFamilial) && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Revenus Fiscaux du Foyer</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {userData.revenuFiscalFoyer && (
+                        <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Revenu fiscal du foyer</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.revenuFiscalFoyer}€</p></div>
+                      )}
+                      {userData.quotientFamilial && (
+                        <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Quotient familial</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.quotientFamilial}</p></div>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -916,20 +1178,87 @@ const Profile = () => {
                   </div>
                 )}
 
-                {/* Section Véhicule */}
-                {(userData.marqueVehicule || userData.modeleVehicule || userData.immatriculationVehicule) && (
+                {/* Section Véhicules */}
+                {userData.vehicules && userData.vehicules.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Véhicule</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                      {userData.marqueVehicule && (
-                        <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Marque</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.marqueVehicule}</p></div>
-                      )}
-                      {userData.modeleVehicule && (
-                        <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Modèle</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.modeleVehicule}</p></div>
-                      )}
+                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Véhicules</h3>
+                    <div className="space-y-3">
+                      {userData.vehicules.map((vehicule, index) => (
+                        <div key={index} className="p-3 sm:p-4 bg-secondary/50 rounded-lg border border-secondary">
+                          <p className="text-xs font-medium text-muted-foreground mb-3">Véhicule {index + 1}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {vehicule.marque && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Marque</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.marque}</p>
+                              </div>
+                            )}
+                            {vehicule.modele && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Modèle</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.modele}</p>
+                              </div>
+                            )}
+                            {vehicule.immatriculation && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Plaque d'immatriculation</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.immatriculation}</p>
+                              </div>
+                            )}
+                            {vehicule.chevaux && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Chevaux fiscaux</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.chevaux}</p>
+                              </div>
+                            )}
+                            {vehicule.annee && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Année</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.annee}</p>
+                              </div>
+                            )}
+                            {vehicule.carburant && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Carburant</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.carburant}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    {userData.immatriculationVehicule && (
-                      <div className="mt-3 p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Immatriculation</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.immatriculationVehicule}</p></div>
+                  </div>
+                )}
+
+                {/* Section RQTH */}
+                {userData.rqthStatut && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">RQTH (Reconnaissance de la Qualité de Travailleur Handicapé)</h3>
+                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg mb-3">
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-1">Statut RQTH</p>
+                      <p className="font-medium text-foreground text-sm sm:text-base capitalize">{userData.rqthStatut === "oui" ? "Oui" : "Non"}</p>
+                    </div>
+                    {userData.rqthStatut === "oui" && (
+                      <div className="space-y-3 p-3 sm:p-4 bg-secondary/30 rounded-lg border border-secondary">
+                        {userData.rqthNumero && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Numéro RQTH</p>
+                            <p className="font-medium text-foreground text-sm">{userData.rqthNumero}</p>
+                          </div>
+                        )}
+                        {userData.rqthDateRenouvellement && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Date de renouvellement</p>
+                            <p className="font-medium text-foreground text-sm">{userData.rqthDateRenouvellement}</p>
+                          </div>
+                        )}
+                        {userData.rqthOrganisme && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Organisme de reconnaissance</p>
+                            <p className="font-medium text-foreground text-sm">{userData.rqthOrganisme}</p>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

@@ -200,9 +200,9 @@ const Profile = () => {
 
   const [editedData, setEditedData] = useState<UserData>(userData);
 
-  // Charger les données de localStorage au montage
+  // Charger les données de sessionStorage au montage
   useEffect(() => {
-    const savedData = localStorage.getItem("userProfileData");
+    const savedData = sessionStorage.getItem("userProfileData");
     if (savedData) {
       const parsedData = JSON.parse(savedData);
       setUserData(parsedData);
@@ -218,8 +218,8 @@ const Profile = () => {
 
   const handleSaveProfile = () => {
     setUserData(editedData);
-    // Sauvegarder dans localStorage
-    localStorage.setItem("userProfileData", JSON.stringify(editedData));
+    // Sauvegarder dans sessionStorage
+    sessionStorage.setItem("userProfileData", JSON.stringify(editedData));
     setIsEditingProfile(false);
   };
 

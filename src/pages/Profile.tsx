@@ -353,8 +353,42 @@ const Profile = () => {
                       <Input value={editedData.lieuNaissance} onChange={(e) => handleInputChange("lieuNaissance", e.target.value)} className="text-sm" />
                     </div>
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Code postal du lieu de naissance</label>
-                      <Input value={editedData.codePostalNaissance} onChange={(e) => handleInputChange("codePostalNaissance", e.target.value)} className="text-sm" placeholder="Ex: 75000" />
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Ville et Code postal</label>
+                      <select 
+                        value={editedData.lieuNaissance && editedData.codePostalNaissance ? `${editedData.lieuNaissance}|${editedData.codePostalNaissance}` : ""} 
+                        onChange={(e) => {
+                          const selected = e.target.value;
+                          if (selected) {
+                            const cityName = selected.split('|')[0];
+                            const postalCode = selected.split('|')[1];
+                            handleInputChange("lieuNaissance", cityName);
+                            handleInputChange("codePostalNaissance", postalCode);
+                          }
+                        }} 
+                        className="w-full px-3 py-2 border rounded text-sm"
+                      >
+                        <option value="">Sélectionner une ville...</option>
+                        <option value="Paris|75000">Paris (75000)</option>
+                        <option value="Marseille|13000">Marseille (13000)</option>
+                        <option value="Lyon|69000">Lyon (69000)</option>
+                        <option value="Toulouse|31000">Toulouse (31000)</option>
+                        <option value="Nice|06000">Nice (06000)</option>
+                        <option value="Nantes|44000">Nantes (44000)</option>
+                        <option value="Strasbourg|67000">Strasbourg (67000)</option>
+                        <option value="Montpellier|34000">Montpellier (34000)</option>
+                        <option value="Bordeaux|33000">Bordeaux (33000)</option>
+                        <option value="Lille|59000">Lille (59000)</option>
+                        <option value="Rennes|35000">Rennes (35000)</option>
+                        <option value="Reims|51100">Reims (51100)</option>
+                        <option value="Le Havre|76600">Le Havre (76600)</option>
+                        <option value="Saint-Étienne|42000">Saint-Étienne (42000)</option>
+                        <option value="Toulon|83000">Toulon (83000)</option>
+                        <option value="Grenoble|38000">Grenoble (38000)</option>
+                        <option value="Angers|49000">Angers (49000)</option>
+                        <option value="Dijon|21000">Dijon (21000)</option>
+                        <option value="Nîmes|30000">Nîmes (30000)</option>
+                        <option value="Aix-en-Provence|13100">Aix-en-Provence (13100)</option>
+                      </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
@@ -928,19 +962,15 @@ const Profile = () => {
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Prénom</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.prenom}</p></div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
-                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nom}</p></div>
                     {userData.nomUsage && (
                       <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom d'usage</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nomUsage}</p></div>
                     )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     {userData.nomNaissance && (
                       <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Nom de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.nomNaissance}</p></div>
                     )}
-                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateNaissance}</p></div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
-                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Lieu de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.lieuNaissance}</p></div>
+                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateNaissance}</p></div>
                     {userData.codePostalNaissance && (
                       <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Code postal du lieu de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.codePostalNaissance}</p></div>
                     )}

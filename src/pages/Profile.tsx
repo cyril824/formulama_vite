@@ -4,6 +4,7 @@ import { ArrowLeft, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 // Interface pour les données utilisateur
 interface UserData {
@@ -252,11 +253,21 @@ const Profile = () => {
     setIsEditingProfile(true);
   };
 
+  const { toast } = useToast();
+
   const handleSaveProfile = () => {
     setUserData(editedData);
     // Sauvegarder dans sessionStorage
     sessionStorage.setItem("userProfileData", JSON.stringify(editedData));
     setIsEditingProfile(false);
+    
+    // Afficher un message de confirmation
+    toast({
+      title: "Enregistrement réussi",
+      description: "Vos modifications ont été sauvegardées avec succès.",
+      className: "bg-green-500 text-white border-0 fixed top-4 left-1/2 -translate-x-1/2 rounded-lg shadow-lg max-w-xs px-4 py-2 text-sm animate-fade-in-out",
+      duration: 3000,
+    });
   };
 
   const handleCancelEdit = () => {
@@ -437,7 +448,8 @@ const Profile = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro <span className="text-xs text-gray-500">(identifiant unique du document)</span></label>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Numéro</label>
+                      <p className="text-xs text-foreground mb-2 italic">Numéro attribué au document sélectionné</p>
                       <Input value={editedData.numeroDocument} onChange={(e) => handleInputChange("numeroDocument", e.target.value)} className="text-sm" />
                     </div>
                   </div>
@@ -997,7 +1009,7 @@ const Profile = () => {
                   <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Pièce d'Identité</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Type de document</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.typeDocument}</p></div>
-                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Numéro</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.numeroDocument}</p></div>
+                    <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Numéro</p><p className="text-xs text-foreground mb-2 italic">Numéro attribué au document sélectionné</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.numeroDocument}</p></div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date d'expiration</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateExpiration}</p></div>
@@ -1065,6 +1077,58 @@ const Profile = () => {
                     {userData.dateValiditePermis && (
                       <div className="mt-3 p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date de validité</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateValiditePermis}</p></div>
                     )}
+                  </div>
+                )}
+
+                {/* Section Véhicules */}
+                {userData.vehicules && userData.vehicules.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Véhicules</h3>
+                    <div className="space-y-3">
+                      {userData.vehicules.map((vehicule, index) => (
+                        <div key={index} className="p-3 sm:p-4 bg-secondary/50 rounded-lg border border-secondary">
+                          <p className="text-xs font-medium text-muted-foreground mb-3">Véhicule {index + 1}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {vehicule.marque && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Marque</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.marque}</p>
+                              </div>
+                            )}
+                            {vehicule.modele && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Modèle</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.modele}</p>
+                              </div>
+                            )}
+                            {vehicule.immatriculation && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Plaque d'immatriculation</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.immatriculation}</p>
+                              </div>
+                            )}
+                            {vehicule.chevaux && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Chevaux fiscaux</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.chevaux}</p>
+                              </div>
+                            )}
+                            {vehicule.annee && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Année</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.annee}</p>
+                              </div>
+                            )}
+                            {vehicule.carburant && (
+                              <div>
+                                <p className="text-xs text-muted-foreground mb-1">Carburant</p>
+                                <p className="font-medium text-foreground text-sm">{vehicule.carburant}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -1213,58 +1277,6 @@ const Profile = () => {
                     {userData.numeroAssuranceResponsabilite && (
                       <div className="mt-3 p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">N° Assurance Responsabilité Civile</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.numeroAssuranceResponsabilite}</p></div>
                     )}
-                  </div>
-                )}
-
-                {/* Section Véhicules */}
-                {userData.vehicules && userData.vehicules.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground mb-3 border-b pb-2">Véhicules</h3>
-                    <div className="space-y-3">
-                      {userData.vehicules.map((vehicule, index) => (
-                        <div key={index} className="p-3 sm:p-4 bg-secondary/50 rounded-lg border border-secondary">
-                          <p className="text-xs font-medium text-muted-foreground mb-3">Véhicule {index + 1}</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {vehicule.marque && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Marque</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.marque}</p>
-                              </div>
-                            )}
-                            {vehicule.modele && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Modèle</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.modele}</p>
-                              </div>
-                            )}
-                            {vehicule.immatriculation && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Plaque d'immatriculation</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.immatriculation}</p>
-                              </div>
-                            )}
-                            {vehicule.chevaux && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Chevaux fiscaux</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.chevaux}</p>
-                              </div>
-                            )}
-                            {vehicule.annee && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Année</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.annee}</p>
-                              </div>
-                            )}
-                            {vehicule.carburant && (
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-1">Carburant</p>
-                                <p className="font-medium text-foreground text-sm">{vehicule.carburant}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 )}
 

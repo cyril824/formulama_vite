@@ -349,20 +349,24 @@ const Profile = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Lieu de naissance</label>
-                      <Input value={editedData.lieuNaissance} onChange={(e) => handleInputChange("lieuNaissance", e.target.value)} className="text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Ville et Code postal</label>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Ville et Code postal de naissance</label>
                       <select 
                         value={editedData.lieuNaissance && editedData.codePostalNaissance ? `${editedData.lieuNaissance}|${editedData.codePostalNaissance}` : ""} 
                         onChange={(e) => {
                           const selected = e.target.value;
                           if (selected) {
-                            const cityName = selected.split('|')[0];
-                            const postalCode = selected.split('|')[1];
-                            handleInputChange("lieuNaissance", cityName);
-                            handleInputChange("codePostalNaissance", postalCode);
+                            const [cityName, postalCode] = selected.split('|');
+                            setEditedData({
+                              ...editedData,
+                              lieuNaissance: cityName,
+                              codePostalNaissance: postalCode
+                            });
+                          } else {
+                            setEditedData({
+                              ...editedData,
+                              lieuNaissance: "",
+                              codePostalNaissance: ""
+                            });
                           }
                         }} 
                         className="w-full px-3 py-2 border rounded text-sm"
@@ -389,6 +393,10 @@ const Profile = () => {
                         <option value="Nîmes|30000">Nîmes (30000)</option>
                         <option value="Aix-en-Provence|13100">Aix-en-Provence (13100)</option>
                       </select>
+                    </div>
+                    <div>
+                      <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 block">Ou saisir manuellement</label>
+                      <Input value={editedData.lieuNaissance} onChange={(e) => handleInputChange("lieuNaissance", e.target.value)} className="text-sm" placeholder="Lieu de naissance" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
@@ -972,7 +980,7 @@ const Profile = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">
                     <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Date de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.dateNaissance}</p></div>
                     {userData.codePostalNaissance && (
-                      <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Code postal du lieu de naissance</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.codePostalNaissance}</p></div>
+                      <div className="p-3 sm:p-4 bg-secondary/50 rounded-lg"><p className="text-xs sm:text-sm text-muted-foreground mb-1">Lieu de naissance avec code postal</p><p className="font-medium text-foreground text-sm sm:text-base">{userData.lieuNaissance} ({userData.codePostalNaissance})</p></div>
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3">

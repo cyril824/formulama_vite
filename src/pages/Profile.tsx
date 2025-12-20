@@ -236,6 +236,18 @@ const Profile = () => {
   });
 
   const [editedData, setEditedData] = useState<UserData>(userData);
+  
+  // Stats des documents
+  const [stats, setStats] = useState({
+    total: 0,
+    signes: 0,
+    nonSignes: 0,
+    archives: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // API URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
   // Charger les données de sessionStorage au montage
   useEffect(() => {
@@ -245,6 +257,57 @@ const Profile = () => {
       setUserData(parsedData);
       setEditedData(parsedData);
     }
+  }, []);
+
+  // Fonction pour charger les stats des documents
+  const fetchDocumentStats = async () => {
+    setStatsLoading(true);
+    try {
+      // Les catégories réelles du Dashboard
+      const categories = ["Documents archivés", "Documents supportés"];
+      const counts: { [key: string]: number } = { "Documents archivés": 0, "Documents supportés": 0 };
+
+      for (const category of categories) {
+        const url = `${API_BASE_URL}/api/documents/${encodeURIComponent(category)}`;
+        console.log(`Fetching: ${url}`);
+        
+        const response = await fetch(url);
+        console.log(`Response status for ${category}:`, response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Data for ${category}:`, data);
+          counts[category] = Array.isArray(data) ? data.length : 0;
+          console.log(`Count for ${category}:`, counts[category]);
+        } else {
+          console.warn(`Failed to fetch ${category}: ${response.status}`);
+        }
+      }
+
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      console.log("Final stats:", { total, archives: counts["Documents archivés"], supportes: counts["Documents supportés"] });
+      
+      setStats({
+        total,
+        signes: 0, // Placeholder pour compatibilité
+        nonSignes: counts["Documents supportés"],
+        archives: counts["Documents archivés"]
+      });
+    } catch (error) {
+      console.error("Erreur lors du chargement des stats:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Charger les stats au montage
+  useEffect(() => {
+    fetchDocumentStats();
+    
+    // Rafraîchir les stats chaque 3 secondes pour détecter les changements
+    const statsInterval = setInterval(fetchDocumentStats, 3000);
+    
+    return () => clearInterval(statsInterval);
   }, []);
 
   // Gestion de l'édition du profil
@@ -1361,10 +1424,10 @@ const Profile = () => {
           {/* Section Statistiques */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {[
-              { label: "Documents", value: "42" },
-              { label: "Archivés", value: "8" },
-              { label: "En cours", value: "34" },
-              { label: "Signés", value: "35" },
+              { label: "Total", value: statsLoading ? "-" : stats.total },
+              { label: "Supportés", value: statsLoading ? "-" : stats.nonSignes },
+              { label: "Archivés", value: statsLoading ? "-" : stats.archives },
+              { label: "En cours", value: statsLoading ? "-" : (stats.total - stats.archives) },
             ].map((stat, index) => (
               <Card key={index} className="p-3 sm:p-6 text-center">
                 <p className="text-xs sm:text-sm text-muted-foreground mb-1 sm:mb-2">

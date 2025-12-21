@@ -8,7 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 // CORRECTION D'IMPORTATION : Chemins explicites pour la résolution
 import DocumentUpload from "../components/DocumentUpload.tsx";
 import DocumentViewer from "../components/DocumentViewer.tsx"; // Import du visualiseur
-import NavigationMenu from "@/components/NavigationMenu"; 
+import NavigationMenu from "@/components/NavigationMenu";
+import SignaturePad from "@/components/SignaturePad"; 
 
 // Importez les hooks nécessaires pour le routage et la navigation
 import { useSearchParams, Link, useNavigate } from "react-router-dom"; 
@@ -34,7 +35,7 @@ interface Document {
 }
 
 // CORRECTION CRITIQUE : Utilisation stricte de localhost pour éviter les blocages inter-IP
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'localhost:5001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
 // --- COMPOSANT : Contenu de la Page d'Accueil DYNAMIQUE ---
 const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDocumentClick: (doc: Document) => void }) => {
@@ -44,6 +45,7 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
 
   // Fonction pour charger les documents récents
   const fetchRecentDocuments = useCallback(async () => {
@@ -88,11 +90,17 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
   
   const handleSignDocument = async () => {
     if (!selectedDoc) return;
+    setShowContextMenu(false);
+    setShowSignaturePad(true);
+  };
+
+  const handleSignatureComplete = async (signatureData: string) => {
+    if (!selectedDoc) return;
     try {
-      // Appel API pour mettre à jour la catégorie en "Signé"
       // Pour l'instant, on simule juste le changement
+      console.log('Signature complétée:', signatureData);
       alert(`Document "${selectedDoc.nom_fichier}" a été signé`);
-      setShowContextMenu(false);
+      setShowSignaturePad(false);
       setSelectedDoc(null);
       // Rafraîchir la liste
       fetchRecentDocuments();
@@ -249,6 +257,20 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
             </div>
           </div>
         </>
+      )}
+
+      {/* Signature Pad Modal */}
+      {showSignaturePad && selectedDoc && (
+        <SignaturePad
+          onSign={handleSignatureComplete}
+          onCancel={() => {
+            setShowSignaturePad(false);
+            setSelectedDoc(null);
+          }}
+          documentName={selectedDoc.nom_fichier}
+          documentPath={`${API_BASE_URL}/api/documents/preview/${selectedDoc.id}`}
+          documentType={selectedDoc.nom_fichier.split('.').pop()?.toLowerCase() || 'pdf'}
+        />
       )}
     </div>
   );

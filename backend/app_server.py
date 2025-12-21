@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 import urllib.parse 
 
 # Importe toutes les fonctions nécessaires
-from gestion_db import ajouter_document, recuperer_documents_par_categorie, supprimer_document, initialiser_base_de_donnees, recuperer_4_derniers_documents, diagnostiquer_fichiers_locaux, recuperer_tous_documents 
+from gestion_db import ajouter_document, recuperer_documents_par_categorie, supprimer_document, initialiser_base_de_donnees, recuperer_4_derniers_documents, diagnostiquer_fichiers_locaux, recuperer_tous_documents, recuperer_document_par_id 
 
 # 1. Configuration de l'application Flask
 app = Flask(__name__)
@@ -174,6 +174,50 @@ def api_supprimer_tous_documents():
     except Exception as e:
         print(f"Erreur lors de la suppression de tous les documents: {e}")
         return jsonify({"error": f"Erreur lors de la suppression: {e}"}), 500
+
+# 8. Endpoint pour prévisualiser un document
+@app.route('/api/documents/preview/<int:doc_id>')
+def api_preview_document(doc_id):
+    """Retourne le fichier du document pour prévisualisation"""
+    try:
+        from gestion_db import recuperer_document_par_id
+        
+        # Récupérer le document depuis la base de données
+        document = recuperer_document_par_id(doc_id)
+        
+        if not document or not document.get('chemin_local'):
+            return jsonify({"error": "Document non trouvé"}), 404
+        
+        # Récupérer le chemin du fichier
+        file_path = document.get('chemin_local')
+        
+        # Vérifier que le fichier existe
+        if not os.path.exists(file_path):
+            return jsonify({"error": "Fichier non trouvé"}), 404
+        
+        # Déterminer le MIME type
+        filename = os.path.basename(file_path)
+        mimetype = get_mimetype(filename)
+        
+        # Retourner le fichier
+        return send_from_directory(
+            os.path.dirname(file_path), 
+            os.path.basename(file_path),
+            mimetype=mimetype
+        )
+    except Exception as e:
+        print(f"Erreur lors de la récupération du document: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# 9. Endpoint pour servir directement les fichiers du dossier data
+@app.route('/api/documents/file/<filename>')
+def serve_document_file(filename):
+    """Sert les fichiers du dossier data"""
+    try:
+        return send_from_directory(DATA_FOLDER_PATH, filename)
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier: {e}")
+        return jsonify({"error": "Fichier non trouvé"}), 404
 
 # 7. Lancement du serveur
 if __name__ == '__main__':

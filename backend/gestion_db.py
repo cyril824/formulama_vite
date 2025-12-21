@@ -125,6 +125,35 @@ def recuperer_documents_par_categorie(categorie):
             
     return documents
 
+def recuperer_document_par_id(doc_id):
+    """Récupère un document spécifique par son ID"""
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        select_query = """
+        SELECT id, nom_fichier, chemin_local, categorie, date_ajout 
+        FROM documents
+        WHERE id = ?
+        """
+        
+        cursor.execute(select_query, (doc_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            return dict(result)
+        return None
+
+    except sqlite3.Error as e:
+        print(f"🛑 Erreur lors de la récupération du document {doc_id} : {e}")
+        return None
+        
+    finally:
+        if conn:
+            conn.close()
+
 def recuperer_tous_documents():
     """
     Récupère TOUS les documents de la base de données, peu importe la catégorie.
@@ -137,7 +166,7 @@ def recuperer_tous_documents():
         cursor = conn.cursor()
 
         select_query = """
-        SELECT id, nom_fichier, chemin_local, categorie, date_ajout 
+        SELECT id, nom_fichier, chemin_local, categorie, date_ajout
         FROM documents
         ORDER BY date_ajout DESC
         """

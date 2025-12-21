@@ -217,7 +217,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
                 style={{ display: 'block' }}
               />
               
-              {/* Canvas Overlay for Signature - allow pointer events to pass through when not drawing */}
+              {/* Canvas Overlay for Signature */}
               <canvas
                 ref={canvasRef}
                 onMouseDown={startDrawing}

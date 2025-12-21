@@ -185,26 +185,37 @@ def api_preview_document(doc_id):
         # Récupérer le document depuis la base de données
         document = recuperer_document_par_id(doc_id)
         
-        if not document or not document.get('chemin_local'):
+        if not document or not document.get('nom_fichier'):
             return jsonify({"error": "Document non trouvé"}), 404
         
-        # Récupérer le chemin du fichier
-        file_path = document.get('chemin_local')
+        # Utiliser le chemin absolu dans le dossier data
+        filename = document.get('nom_fichier')
+        file_path = os.path.join(DATA_FOLDER_PATH, filename)
         
         # Vérifier que le fichier existe
         if not os.path.exists(file_path):
+            print(f"Fichier non trouvé à: {file_path}")
             return jsonify({"error": "Fichier non trouvé"}), 404
         
         # Déterminer le MIME type
-        filename = os.path.basename(file_path)
         mimetype = get_mimetype(filename)
         
-        # Retourner le fichier
-        return send_from_directory(
-            os.path.dirname(file_path), 
-            os.path.basename(file_path),
+        print(f"Servant le document: {file_path} (MIME: {mimetype})")
+        
+        # Retourner le fichier avec les bons headers CORS
+        response = send_from_directory(
+            DATA_FOLDER_PATH, 
+            filename,
             mimetype=mimetype
         )
+        
+        # Ajouter les headers CORS pour que react-pdf puisse charger
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Range'
+        response.headers['Accept-Ranges'] = 'bytes'
+        
+        return response
     except Exception as e:
         print(f"Erreur lors de la récupération du document: {e}")
         return jsonify({"error": str(e)}), 500

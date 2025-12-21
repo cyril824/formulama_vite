@@ -56,9 +56,19 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     
+    const handleGlobalMouseUp = () => {
+      setIsDrawing(false);
+    };
+
+    // Ajouter le listener sur le document pour s'assurer qu'on sort du mode dessin
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('touchend', handleGlobalMouseUp);
+    
     return () => {
       document.body.style.overflow = 'auto';
       document.documentElement.style.overflow = 'auto';
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchend', handleGlobalMouseUp);
     };
   }, []);
 
@@ -227,9 +237,9 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
-                className="absolute top-0 left-0 cursor-crosshair"
+                className="absolute top-0 left-0 cursor-crosshair pointer-events-none"
                 style={{
-                  zIndex: 10,
+                  zIndex: 5,
                   opacity: isEmpty ? 0.2 : 1,
                   transition: 'opacity 0.2s',
                   pointerEvents: isDrawing ? 'auto' : 'none',
@@ -245,8 +255,8 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
           )}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-2 sm:gap-3 justify-end flex-wrap px-4 sm:px-6 pb-4 sm:pb-6">
+        {/* Buttons - Higher z-index to be above canvas */}
+        <div className="flex gap-2 sm:gap-3 justify-end flex-wrap px-4 sm:px-6 pb-4 sm:pb-6 relative z-20">
           <button
             onClick={clearSignature}
             disabled={isEmpty}

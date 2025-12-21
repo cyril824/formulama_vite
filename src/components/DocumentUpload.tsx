@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import { useDocumentContext } from '@/context/DocumentContext';
 
@@ -115,7 +114,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadSuccess }) => {
             
             <div className="flex flex-col space-y-4 min-w-0 w-full max-w-full">
                 <div 
-                    className="border-2 border-dashed border-indigo-300 dark:border-blue-400/80 rounded-lg p-4 sm:p-10 text-center hover:border-indigo-400 dark:hover:border-blue-300 transition-all duration-300 cursor-pointer w-full bg-blue-50 dark:bg-gradient-to-br dark:from-blue-800/50 dark:via-blue-700/35 dark:to-blue-800/50 dark:hover:from-blue-800/60 dark:hover:via-blue-700/45 dark:hover:to-blue-800/60 relative overflow-hidden group backdrop-blur-sm"
+                    className="border-2 border-dashed border-indigo-300 dark:border-blue-400/80 rounded-lg p-4 sm:p-10 text-center hover:border-indigo-400 dark:hover:border-blue-300 transition-all duration-300 cursor-pointer w-full bg-gray-50 dark:bg-gradient-to-br dark:from-blue-800/50 dark:via-blue-700/35 dark:to-blue-800/50 dark:hover:from-blue-800/60 dark:hover:via-blue-700/45 dark:hover:to-blue-800/60 relative overflow-hidden group backdrop-blur-sm"
                     onClick={() => document.getElementById('fileInput')?.click()}
                 >
                     <div className="absolute inset-0 dark:bg-gradient-to-r dark:from-stone-500/0 dark:via-stone-400/15 dark:to-stone-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

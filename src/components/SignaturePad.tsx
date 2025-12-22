@@ -185,11 +185,11 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
-      <div ref={containerRef} className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col">
+      <div ref={containerRef} className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full h-[95vh] sm:h-[90vh] max-w-full sm:max-w-5xl flex flex-col">
         {/* En-tête */}
-        <div className="flex items-center justify-between mb-4 p-4 sm:p-6 border-b border-gray-300 dark:border-slate-700 flex-shrink-0">
-          <div className="flex-1">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Signer le document</h2>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-300 dark:border-slate-700 flex-shrink-0 gap-2">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Signer le document</h2>
             {documentName && (
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">Document: {documentName}</p>
             )}
@@ -203,14 +203,14 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
         </div>
 
         {/* Instructions */}
-        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-4 sm:px-6 mb-4 flex-shrink-0">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
           Signez sur le document avec votre souris ou votre doigt (en rouge)
         </p>
 
         {/* Document Viewer with Canvas Overlay */}
         <div 
           ref={viewerContainerRef}
-          className="flex-1 relative overflow-y-auto overflow-x-hidden rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-900 mx-4 sm:mx-6"
+          className="flex-1 relative overflow-y-auto overflow-x-hidden rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-900 mx-3 sm:mx-6 mb-3 sm:mb-4"
           style={{ minHeight: 0 }}
         >
           {loadError ? (
@@ -258,24 +258,24 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ onSign, onCancel, documentN
           )}
         </div>
 
-        {/* Buttons - Floating buttons that appear only when there's a signature */}
+        {/* Buttons - Integrated at bottom with responsive layout */}
         {!isEmpty && (
-          <div className="fixed bottom-6 right-6 flex gap-2 sm:gap-3 z-[9999] pointer-events-auto">
+          <div className="flex gap-2 sm:gap-3 p-3 sm:p-4 border-t border-gray-300 dark:border-slate-700 flex-shrink-0 flex-wrap sm:flex-nowrap justify-center sm:justify-end z-[9999] pointer-events-auto">
             <button
               onClick={clearSignature}
-              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg font-semibold text-sm bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors shadow-lg hover:shadow-xl"
+              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex-1 sm:flex-none min-h-[40px] sm:min-h-[44px]"
             >
               Effacer
             </button>
             <button
               onClick={onCancel}
-              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg font-semibold text-sm bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors shadow-lg hover:shadow-xl"
+              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors shadow-lg hover:shadow-xl active:scale-95 flex-1 sm:flex-none min-h-[40px] sm:min-h-[44px]"
             >
               Annuler
             </button>
             <button
               onClick={handleValidate}
-              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg font-semibold text-sm bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
+              className="px-4 sm:px-5 py-2 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl active:scale-95 flex-1 sm:flex-none min-h-[40px] sm:min-h-[44px]"
             >
               ✓ Valider
             </button>

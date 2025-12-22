@@ -226,12 +226,12 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
           <div 
             className="fixed z-50 rounded-2xl shadow-2xl border border-border/80 overflow-hidden animate-in fade-in zoom-in-95 duration-200 bg-gradient-to-br from-background via-background to-background/95"
             style={{
-              left: `${menuPosition.x}px`,
-              top: `${menuPosition.y}px`,
-              transform: 'translateX(-100%)',
+              left: `${Math.min(menuPosition.x, window.innerWidth - 200)}px`,
+              top: `${Math.min(menuPosition.y, window.innerHeight - 200)}px`,
+              transform: `translate(${menuPosition.x > window.innerWidth - 200 ? '-100%' : '0'}, 0)`,
               width: 'auto',
-              minWidth: '160px',
-              maxWidth: 'calc(100vw - 20px)'
+              minWidth: '190px',
+              maxWidth: 'calc(100vw - 30px)'
             }}
           >
             {/* Boutons avec design horizontal/vertical cleaner */}

@@ -86,7 +86,8 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
   };
 
   // Logique pour simuler l'état "Signé" ou "Non Signé"
-  const isSigned = (doc: Document) => doc.categorie === "Documents supportés"; 
+  // Par défaut, tous les documents sont "Non signé" quand ils sont ajoutés
+  const isSigned = (doc: Document) => false; 
   
   const handleSignDocument = async () => {
     if (!selectedDoc) return;

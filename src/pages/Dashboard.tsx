@@ -295,10 +295,41 @@ const HomeContent = ({ refreshKey, onDocumentClick }: { refreshKey: number, onDo
 // --- COMPOSANT DE NAVIGATION LATÉRALE DYNAMIQUE ---
 const SidebarContent = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({ total: 0, archives: 0, supportes: 0 });
   
   // Lit le paramètre 'view' de l'URL ou utilise 'home' par défaut
   const currentView = searchParams.get('view') || 'home'; 
+
+  // Charge les statistiques au montage
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const categories = ["Documents archivés", "Documents supportés"];
+        const counts: { [key: string]: number } = { "Documents archivés": 0, "Documents supportés": 0 };
+        
+        for (const category of categories) {
+          const url = `${API_BASE_URL}/api/documents/${encodeURIComponent(category)}`;
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            counts[category] = Array.isArray(data) ? data.length : 0;
+          }
+        }
+        
+        const total = Object.values(counts).reduce((a, b) => a + b, 0);
+        setStats({
+          total,
+          archives: counts["Documents archivés"],
+          supportes: counts["Documents supportés"]
+        });
+      } catch (error) {
+        console.error("Erreur lors du chargement des stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   // Gère la déconnexion
   const handleLogout = () => {
@@ -311,6 +342,25 @@ const SidebarContent = () => {
       <div className="p-6 border-b border-border">
         <h2 className="text-xl font-bold text-primary">Formulama</h2>
         <p className="text-sm text-muted-foreground">Menu de navigation</p>
+      </div>
+
+      {/* Section Statistiques */}
+      <div className="px-4 py-4 space-y-2 border-b border-border bg-primary/5">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-lg font-bold text-primary">{stats.total}</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Archivés</p>
+            <p className="text-lg font-bold text-primary">{stats.archives}</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Supportés</p>
+            <p className="text-lg font-bold text-primary">{stats.supportes}</p>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-1">

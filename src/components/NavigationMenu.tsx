@@ -1,10 +1,12 @@
-import { Archive, FileCheck, Database, HelpCircle, LogOut, Home } from "lucide-react";
+import { Archive, FileCheck, Database, HelpCircle, LogOut, Home, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react";
 
 const NavigationMenu = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ total: 5, archives: 2, supportes: 3 });
 
   const menuItems = [
     { icon: Home, label: "Accueil", path: "/dashboard" },
@@ -18,6 +20,25 @@ const NavigationMenu = () => {
       <div className="p-6 border-b border-border">
         <h2 className="text-xl font-bold text-foreground">Formulama</h2>
         <p className="text-sm text-muted-foreground mt-1">Menu de navigation</p>
+      </div>
+
+      {/* Section Statistiques en haut */}
+      <div className="px-4 py-4 space-y-2 border-b border-border bg-primary/5">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</p>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-lg font-bold text-primary">{stats.total}</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Archivés</p>
+            <p className="text-lg font-bold text-primary">{stats.archives}</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-background/50">
+            <p className="text-xs text-muted-foreground">Supportés</p>
+            <p className="text-lg font-bold text-primary">{stats.supportes}</p>
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

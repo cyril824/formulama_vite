@@ -38,7 +38,7 @@ const DocumentsPage: React.FC<DocumentsPageProps> = ({ currentCategory, refreshK
     const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
     const [showSignaturePad, setShowSignaturePad] = useState(false);
-    const [viewingDocument, setViewingDocument] = useState<{ fileName: string; fileUrl: string } | null>(null);
+    const [viewingDocument, setViewingDocument] = useState<{ fileName: string; fileUrl: string; documentId: number } | null>(null);
 
     // Hook pour notifier les changements de documents
     const { notifyDocumentChange } = useDocumentContext();
@@ -79,7 +79,8 @@ const DocumentsPage: React.FC<DocumentsPageProps> = ({ currentCategory, refreshK
         if (selectedDoc) {
             setViewingDocument({
                 fileName: selectedDoc.nom_fichier,
-                fileUrl: `${API_BASE_URL}/api/documents/preview/${selectedDoc.id}`
+                fileUrl: `${API_BASE_URL}/api/documents/preview/${selectedDoc.id}`,
+                documentId: selectedDoc.id
             });
             setShowContextMenu(false);
             setSelectedDoc(null);
@@ -89,19 +90,20 @@ const DocumentsPage: React.FC<DocumentsPageProps> = ({ currentCategory, refreshK
     const handleSignatureComplete = async (signatureData: string) => {
         if (!selectedDoc) return;
         try {
-            // Appeler l'API pour marquer le document comme signé
+            // Appeler l'API pour marquer le document comme signé et sauvegarder la signature
             const response = await fetch(`${API_BASE_URL}/api/documents/${selectedDoc.id}/sign`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({ signatureData }),
             });
 
             if (!response.ok) {
                 throw new Error('Erreur lors de la mise à jour du document');
             }
 
-            console.log('Signature complétée:', signatureData);
+            console.log('Signature complétée et sauvegardée');
             alert(`Document "${selectedDoc.nom_fichier}" a été signé avec succès!`);
             setShowSignaturePad(false);
             setSelectedDoc(null);
@@ -355,6 +357,7 @@ const DocumentsPage: React.FC<DocumentsPageProps> = ({ currentCategory, refreshK
                     fileName={viewingDocument.fileName}
                     fileUrl={viewingDocument.fileUrl}
                     onClose={handleCloseViewer}
+                    documentId={viewingDocument.documentId}
                 />
             )}
         </div>

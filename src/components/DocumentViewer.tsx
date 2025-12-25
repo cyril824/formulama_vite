@@ -8,13 +8,17 @@ interface DocumentViewerProps {
     // L'URL de consultation du document (API Flask)
     fileUrl: string; 
     // Fonction de rappel pour fermer la modale
-    onClose: () => void; 
+    onClose: () => void;
+    // ID du document (pour récupérer la signature)
+    documentId?: number;
 }
 
-const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onClose }) => {
+const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onClose, documentId }) => {
     const [blobUrl, setBlobUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
     // Définir la classe MIME type pour une meilleure gestion de l'affichage
     const isImage = /\.(jpe?g|png|gif)$/i.test(fileName);
@@ -58,6 +62,53 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onCl
             }
         };
     }, [fileUrl]);
+
+    // Charger la signature si le documentId est fourni
+    useEffect(() => {
+        if (!documentId) {
+            console.log('No documentId provided');
+            setSignatureUrl(null);
+            return;
+        }
+
+        console.log('Loading signature for document ID:', documentId);
+        let isMounted = true;
+
+        const loadSignature = async () => {
+            try {
+                const signaturePath = `${API_BASE_URL}/api/documents/${documentId}/signature`;
+                console.log('Fetching signature from:', signaturePath);
+                
+                const response = await fetch(signaturePath);
+                console.log('Signature response status:', response.status);
+                
+                if (!isMounted) return;
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    console.log('Signature blob size:', blob.size);
+                    const url = URL.createObjectURL(blob);
+                    console.log('Signature blob URL created:', url);
+                    setSignatureUrl(url);
+                } else {
+                    console.log('Signature not found (status:', response.status, ')');
+                    setSignatureUrl(null);
+                }
+            } catch (err) {
+                console.error('Erreur lors du chargement de la signature:', err);
+                if (isMounted) {
+                    setSignatureUrl(null);
+                }
+            }
+        };
+
+        loadSignature();
+
+        // Cleanup
+        return () => {
+            isMounted = false;
+        };
+    }, [documentId, API_BASE_URL]);
     
 
     let renderElement;
@@ -94,7 +145,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onCl
     } else if (isImage) {
         // Pour les images, utiliser une balise <img>
         renderElement = (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center relative">
                 <img 
                     src={blobUrl} 
                     alt={`Aperçu de ${fileName}`} 
@@ -105,6 +156,15 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onCl
                         setError('Impossible de charger l\'image');
                     }}
                 />
+                {/* Afficher la signature par-dessus si elle existe */}
+                {signatureUrl && (
+                    <img
+                        src={signatureUrl}
+                        alt="Signature"
+                        className="absolute bottom-8 right-8 h-24 opacity-80 drop-shadow-lg z-50"
+                        onError={() => console.error('Erreur de chargement de la signature')}
+                    />
+                )}
             </div>
         );
     } else if (isPdf) {
@@ -118,6 +178,17 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ fileName, fileUrl, onCl
                     onClick={(e) => e.stopPropagation()}
                     allow="fullscreen"
                 />
+                {/* Afficher la signature par-dessus le PDF si elle existe */}
+                {signatureUrl && (
+                    <div className="absolute bottom-8 right-8 z-50">
+                        <img
+                            src={signatureUrl}
+                            alt="Signature"
+                            className="h-24 opacity-80 drop-shadow-lg"
+                            onError={() => console.error('Erreur de chargement de la signature')}
+                        />
+                    </div>
+                )}
                 {/* Fallback button pour télécharger si l'iframe ne fonctionne pas */}
                 <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 flex flex-col gap-2 bg-yellow-50 dark:bg-yellow-900/30 p-2 sm:p-3 rounded-md border border-yellow-200 dark:border-yellow-700">
                     <p className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">Aperçu PDF limité ?</p>

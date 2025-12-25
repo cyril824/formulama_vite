@@ -1,9 +1,10 @@
 import flask
-from flask import Flask, request, jsonify, send_from_directory, abort
+from flask import Flask, request, jsonify, send_from_directory, abort, send_file
 from flask_cors import CORS
 import os 
 from werkzeug.utils import secure_filename 
-import urllib.parse 
+import urllib.parse
+import base64 
 
 # Importe toutes les fonctions nécessaires
 from gestion_db import ajouter_document, recuperer_documents_par_categorie, supprimer_document, initialiser_base_de_donnees, recuperer_4_derniers_documents, diagnostiquer_fichiers_locaux, recuperer_tous_documents, recuperer_document_par_id, marquer_document_signe 
@@ -15,6 +16,9 @@ CORS(app)
 # --- DÉFINITION DU CHEMIN DU DOSSIER DE DONNÉES ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FOLDER_PATH = os.path.join(PROJECT_ROOT, 'data')
+SIGNATURES_FOLDER_PATH = os.path.join(DATA_FOLDER_PATH, 'signatures')
+# Créer le dossier des signatures s'il n'existe pas
+os.makedirs(SIGNATURES_FOLDER_PATH, exist_ok=True)
 # ----------------------------------------------------
 
 # --- FONCTION UTILITAIRE POUR LE MIME TYPE ---
@@ -26,6 +30,28 @@ def get_mimetype(filename):
         return 'image/' + filename.split('.')[-1]
     else:
         return 'application/octet-stream'
+
+
+# --- FONCTION POUR SAUVEGARDER LA SIGNATURE ---
+def save_signature(doc_id, signature_base64):
+    """Sauvegarde la signature (base64 PNG) sur le disque."""
+    try:
+        # Supprimer le préfixe data:image/png;base64, si présent
+        if 'base64,' in signature_base64:
+            signature_base64 = signature_base64.split('base64,')[1]
+        
+        # Décoder et sauvegarder
+        signature_binary = base64.b64decode(signature_base64)
+        signature_path = os.path.join(SIGNATURES_FOLDER_PATH, f'{doc_id}.png')
+        
+        with open(signature_path, 'wb') as f:
+            f.write(signature_binary)
+        
+        print(f"Signature sauvegardée: {signature_path}")
+        return True
+    except Exception as e:
+        print(f"Erreur lors de la sauvegarde de la signature: {e}")
+        return False
 
 
 # 2. Point d'accès de base
@@ -150,12 +176,32 @@ def api_ouvrir_document(filename):
 @app.route('/api/documents/<int:doc_id>/sign', methods=['PUT'])
 def api_marquer_document_signe(doc_id):
     try:
+        data = request.get_json() or {}
+        signature_data = data.get('signatureData')
+        
+        # Marquer le document comme signé
         if marquer_document_signe(doc_id):
+            # Sauvegarder la signature si fournie
+            if signature_data:
+                save_signature(doc_id, signature_data)
             return jsonify({"message": f"Document ID {doc_id} marqué comme signé."}), 200
         else:
             return jsonify({"error": f"Impossible de mettre à jour le document ID {doc_id}."}), 404
     except Exception as e:
         print(f"Erreur lors de la signature du document: {e}")
+        return jsonify({"error": "Erreur interne du serveur"}), 500
+
+# Endpoint pour récupérer la signature d'un document
+@app.route('/api/documents/<int:doc_id>/signature', methods=['GET'])
+def api_get_signature(doc_id):
+    try:
+        signature_path = os.path.join(SIGNATURES_FOLDER_PATH, f'{doc_id}.png')
+        if os.path.exists(signature_path):
+            return send_file(signature_path, mimetype='image/png')
+        else:
+            return jsonify({"error": "Signature not found"}), 404
+    except Exception as e:
+        print(f"Erreur lors de la récupération de la signature: {e}")
         return jsonify({"error": "Erreur interne du serveur"}), 500
 
 # 6. Endpoint pour supprimer un document (Méthode DELETE)
